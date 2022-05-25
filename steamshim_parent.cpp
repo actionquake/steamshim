@@ -1,8 +1,3 @@
-#define GAME_LAUNCH_NAME "testapp"
-#ifndef GAME_LAUNCH_NAME
-#error Please define your game exe name.
-#endif
-
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
@@ -102,7 +97,7 @@ static bool setEnvVar(const char *key, const char *val)
 
 static bool launchChild(ProcessType *pid);
 {
-    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe"),
+    return (CreateProcessW(("q2pro.exe"),
                            GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
                            NULL, NULL, pid) != 0);
 } // launchChild
@@ -192,7 +187,7 @@ static bool launchChild(ProcessType *pid)
         return true;  // we'll let the pipe fail if this didn't work.
 
     // we're the child.
-    GArgv[0] = strdup("./" GAME_LAUNCH_NAME);
+    GArgv[0] = strdup("./q2pro");
     execvp(GArgv[0], GArgv);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
