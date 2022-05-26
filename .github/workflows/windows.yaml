@@ -16,8 +16,8 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
 
       - name: Build
-        run: msbuild steamshim_parent.vcxproj /p:configuration=release
-        
+        run: msbuild steamshim.vcxproj /p:configuration=release
+
       - name: Generate archive
         uses: actions/upload-artifact@v3
         with:
