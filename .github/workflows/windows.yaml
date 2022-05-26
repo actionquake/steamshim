@@ -1,8 +1,10 @@
 name: Windows Steamshim Build
 
+# on:
+#   push:
+#     branches: ["aqtion", "master"]
 on:
-  push:
-    branches: ["aqtion", "master"]
+  workflow_dispatch:
 
 jobs:
   windows_build_q2pro:
