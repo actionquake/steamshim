@@ -15,7 +15,7 @@ set -x
 
 OSTYPE=`uname -s`
 if [ "$OSTYPE" = "Linux" ]; then
-    g++ -o steamshim -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so
+    g++ -o steamshim -Wl,-rpath="$ORIGIN" -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so
     gcc -o testapp -Wall -O0 -ggdb3 testapp.c steamshim_child.c
 elif [ "$OSTYPE" = "Darwin" ]; then
     clang++ -o steamshim -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/osx32/libsteam_api.dylib
