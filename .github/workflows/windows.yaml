@@ -2,8 +2,8 @@ name: Windows Steamshim Build
 
 on:
   push:
-    branches: aqtion
-    
+    branches: ["aqtion", "master"]
+
 jobs:
   windows_build_q2pro:
     runs-on: windows-latest
