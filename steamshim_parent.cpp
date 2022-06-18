@@ -194,7 +194,6 @@ static bool launchChild(ProcessType *pid)
         return true;  // we'll let the pipe fail if this didn't work.
 
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
-    //printf("SteamID: %llu\n", SteamID);
     char buf[256];
     snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
 
@@ -203,8 +202,7 @@ static bool launchChild(ProcessType *pid)
     GArgv[1] = strdup("+set");
     GArgv[2] = strdup("steamid");
     GArgv[3] = strdup(buf);
-    //printf("SteamID2: %s\n", buf);
-    printf("%s%s%s%s", GArgv[0], GArgv[1], GArgv[2], GArgv[3] );
+    // This is the magic here, passing the steamid argument to q2pro
     execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
