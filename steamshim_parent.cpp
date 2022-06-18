@@ -1,4 +1,5 @@
 #ifdef _WIN32
+#define GAME_LAUNCH_NAME "q2pro"
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
 typedef PROCESS_INFORMATION ProcessType;
@@ -12,6 +13,7 @@ typedef HANDLE PipeType;
 #include <errno.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <inttypes.h>
 typedef pid_t ProcessType;
 typedef int PipeType;
 #define NULLPIPE -1
@@ -95,9 +97,14 @@ static bool setEnvVar(const char *key, const char *val)
     return (SetEnvironmentVariableA(key, val) != 0);
 } // setEnvVar
 
-static bool launchChild(ProcessType *pid);
+static bool launchChild(ProcessType *pid)
 {
-    return (CreateProcessW(("q2pro.exe"),
+    static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    //printf("SteamID: %llu\n", SteamID);
+    char buf[256];
+    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+
+    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe"),
                            GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
                            NULL, NULL, pid) != 0);
 } // launchChild
@@ -186,9 +193,19 @@ static bool launchChild(ProcessType *pid)
     else if (*pid != 0)  // we're the parent
         return true;  // we'll let the pipe fail if this didn't work.
 
+    static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    //printf("SteamID: %llu\n", SteamID);
+    char buf[256];
+    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+
     // we're the child.
-    GArgv[0] = strdup("./q2pro");
-    execvp(GArgv[0], GArgv);
+    GArgv[0] = strdup("q2pro");
+    GArgv[1] = strdup("+set");
+    GArgv[2] = strdup("steamid");
+    GArgv[3] = strdup(buf);
+    //printf("SteamID2: %s\n", buf);
+    printf("%s%s%s%s", GArgv[0], GArgv[1], GArgv[2], GArgv[3] );
+    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
 } // launchChild
