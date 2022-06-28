@@ -100,11 +100,10 @@ static bool setEnvVar(const char *key, const char *val)
 static bool launchChild(ProcessType *pid)
 {
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
-    //printf("SteamID: %llu\n", SteamID);
     char buf[256];
     snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
 
-    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe"),
+    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe") TEXT(" +set steamid ") TEXT(buf),
                            GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
                            NULL, NULL, pid) != 0);
 } // launchChild
