@@ -194,7 +194,7 @@ static bool launchChild(ProcessType *pid)
 
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
     char buf[256];
-    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+    snprintf(buf, sizeof buf, "%llu", SteamID);
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
