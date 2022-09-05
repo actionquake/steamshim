@@ -195,17 +195,26 @@ static bool launchChild(ProcessType *pid)
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
     static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
     static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
-    char buf[256];
-    snprintf(buf, sizeof(buf), " +set steamid %llu", SteamID);
-    snprintf(buf, sizeof(buf), " +set isCloudEnabledForSteamApp %d +set isCloudEnabledForSteamAccount %d", steamCloudApp, steamCloudUser); // Append to buffer
+    char buf1[256];
+    char buf2[256];
+    char buf3[256];
+    snprintf(buf1, sizeof buf1, "%llu", SteamID);
+    snprintf(buf2, sizeof buf2, "%d", steamCloudApp);
+    snprintf(buf3, sizeof buf3, "%d", steamCloudUser);
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
     GArgv[1] = strdup("+set");
     GArgv[2] = strdup("steamid");
-    GArgv[3] = strdup(buf);
+    GArgv[3] = strdup(buf1);
+    GArgv[4] = strdup("+set");
+    GArgv[5] = strdup("steamcloudappenabled");
+    GArgv[6] = strdup(buf2);
+    GArgv[7] = strdup("+set");
+    GArgv[8] = strdup("steamclouduserenabled");
+    GArgv[9] = strdup(buf3);
     // This is the magic here, passing the steamid argument to q2pro
-    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], NULL);
+    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], GArgv[4], GArgv[5], GArgv[6], GArgv[7], GArgv[8], GArgv[9], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
 } // launchChild
