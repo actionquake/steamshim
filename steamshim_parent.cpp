@@ -100,12 +100,15 @@ static bool setEnvVar(const char *key, const char *val)
 static bool launchChild(ProcessType *pid)
 {
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
+    static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
     char buf[256];
-    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+    snprintf(buf, sizeof(buf), " +set steamid %llu", SteamID);
+    snprintf(buf, sizeof(buf), " +set isCloudEnabledForSteamApp %d +set isCloudEnabledForSteamAccount %d", steamCloudApp, steamCloudUser); // Append to buffer
 
-    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe") TEXT(" +set steamid ") TEXT(buf),
-                           GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
-                           NULL, NULL, pid) != 0);
+    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe") TEXT(buf),
+        GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
+        NULL, NULL, pid) != 0);
 } // launchChild
 
 static int closeProcess(ProcessType *pid)
@@ -193,8 +196,11 @@ static bool launchChild(ProcessType *pid)
         return true;  // we'll let the pipe fail if this didn't work.
 
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
+    static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
     char buf[256];
-    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+    snprintf(buf, sizeof(buf), " +set steamid %llu", SteamID);
+    snprintf(buf, sizeof(buf), " +set isCloudEnabledForSteamApp %d +set isCloudEnabledForSteamAccount %d", steamCloudApp, steamCloudUser); // Append to buffer
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
