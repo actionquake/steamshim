@@ -207,14 +207,14 @@ static bool launchChild(ProcessType *pid)
     GArgv[1] = strdup("+set");
     GArgv[2] = strdup("steamid");
     GArgv[3] = strdup(buf1);
-    GArgv[1] = strdup("+set");
-    GArgv[2] = strdup("steamcloudappenabled");
-    GArgv[3] = strdup(buf2);
-    GArgv[1] = strdup("+set");
-    GArgv[2] = strdup("steamclouduserenabled");
-    GArgv[3] = strdup(buf3);
+    GArgv[4] = strdup("+set");
+    GArgv[5] = strdup("steamcloudappenabled");
+    GArgv[6] = strdup(buf2);
+    GArgv[7] = strdup("+set");
+    GArgv[8] = strdup("steamclouduserenabled");
+    GArgv[9] = strdup(buf3);
     // This is the magic here, passing the steamid argument to q2pro
-    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], NULL);
+    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], GArgv[4], GArgv[5], GArgv[6], GArgv[7], GArgv[8], GArgv[9], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
 } // launchChild
