@@ -200,6 +200,7 @@ static bool launchChild(ProcessType *pid)
     char buf3[256];
     snprintf(buf, sizeof buf, "%llu", SteamID);
     snprintf(buf2, sizeof buf2, "%d", steamCloudApp);
+    snprintf(buf3, sizeof buf3, "%d", steamCloudUser);
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
