@@ -200,7 +200,7 @@ static bool launchChild(ProcessType *pid)
     static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
     char buf[256];
     snprintf(buf, sizeof(buf), " +set steamid %llu", SteamID);
-    snprintf(buf, sizeof(buf), " +set isCloudEnabledForSteamApp %d +set isCloudEnabledForSteamAccount %d", steamCloudApp, steamCloudUser); // Append to buffer
+    snprintf(buf, sizeof(buf), " \"+set isCloudEnabledForSteamApp %d\" \"+set isCloudEnabledForSteamAccount %d\"", steamCloudApp, steamCloudUser); // Append to buffer
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
