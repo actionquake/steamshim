@@ -1,0 +1,3 @@
+C:/Users/adean/Documents/git/steamshim/build/CMakeFiles/steamshim.dir
+C:/Users/adean/Documents/git/steamshim/build/CMakeFiles/ALL_BUILD.dir
+C:/Users/adean/Documents/git/steamshim/build/CMakeFiles/ZERO_CHECK.dir

@@ -2,6 +2,12 @@
 #define GAME_LAUNCH_NAME "q2pro"
 #define WIN32_LEAN_AND_MEAN 1
 #include <windows.h>
+//rekkie -- s
+#include <stdlib.h> // wcstombs, wchar_t(C)
+#include <cinttypes> // PRIi64
+#include <tchar.h>  // tchar_t
+#include <shellapi.h> // CommandLineToArgvW
+//rekkie -- e
 typedef PROCESS_INFORMATION ProcessType;
 typedef HANDLE PipeType;
 #define NULLPIPE NULL
@@ -97,16 +103,77 @@ static bool setEnvVar(const char *key, const char *val)
     return (SetEnvironmentVariableA(key, val) != 0);
 } // setEnvVar
 
-static bool launchChild(ProcessType *pid)
-{
-    static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
-    char buf[256];
-    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
 
-    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe") TEXT(" +set steamid ") TEXT(buf),
-                           GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
-                           NULL, NULL, pid) != 0);
+//rekkie -- s
+#if _MSC_VER >= 1920 && !__INTEL_COMPILER
+// Force printing printf to MSVC debug output window.
+#define printf printf2
+int __cdecl printf2(const char* format, ...)
+{
+    char str[1024];
+
+    va_list argptr;
+    va_start(argptr, format);
+    int ret = vsnprintf(str, sizeof(str), format, argptr);
+    va_end(argptr);
+
+    OutputDebugStringA(str);
+
+    return ret;
+}
+#endif
+
+void q2Args(wchar_t *buf)
+{
+    // Get the user Steam ID
+    wchar_t steamid_str[256];
+    uint64_t steamid = SteamUser()->GetSteamID().ConvertToUint64();
+    wcscpy(buf, TEXT(" +set steamid "));
+    //swprintf(steamid_str, L"%" PRIx64, steamid); // Non-Microsoft version, to compile with MSVC include preprocessor _CRT_NON_CONFORMING_SWPRINTFS
+    _swprintf(steamid_str, L"%" PRIi64, steamid); // Microsoft version
+    wcscat(buf, steamid_str);
+
+    // Add user command line arguments, if any
+    int nArgs;
+    LPWSTR* szArglist;
+    szArglist = CommandLineToArgvW(GetCommandLineW(), &nArgs);
+    if (szArglist != NULL)
+    {
+        for (int i = 1; i < nArgs; i++) // Ignore the first argument
+        {
+            wcscat(buf, TEXT(" ")); // Add a space
+            wcscat(buf, szArglist[i]);
+        }
+    }
+
+    // Free memory allocated for CommandLineToArgvW arguments.
+    LocalFree(szArglist);
+}
+
+static bool launchChild(ProcessType* pid)
+{
+    wchar_t prog[256];  // Program exe
+    wchar_t args[256];  // User args
+
+    // Get the executable
+    wcscpy(prog, TEXT(GAME_LAUNCH_NAME));
+    wcscat(prog, TEXT(".exe"));
+
+    // Get any user command line args
+    q2Args(args);
+
+    STARTUPINFOW si;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    if (CreateProcessW(&prog[0], &args[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, pid))
+    {
+        WaitForSingleObject(pid->hProcess, INFINITE);
+        return true;
+    }
+    else
+        return false;
 } // launchChild
+//rekkie -- e
 
 static int closeProcess(ProcessType *pid)
 {
