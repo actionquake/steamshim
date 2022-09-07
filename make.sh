@@ -19,11 +19,11 @@ set -x
 
 OSTYPE=`uname -s`
 if [ "$OSTYPE" = "Linux" ]; then
-    g++ -Wl,-rpath='$ORIGIN' -o steamshim -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -no-pie
-    strip steamshim
+    g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -no-pie
+    strip aqtion
     #gcc -o testapp -Wall -O0 -ggdb3 testapp.c steamshim_child.c
 elif [ "$OSTYPE" = "Darwin" ]; then
-    clang++ -o steamshim -Wall -O0 -ggdb3 -Dnullptr=0 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/osx/libsteam_api.dylib
+    clang++ -o aqtion -Wall -O0 -ggdb3 -Dnullptr=0 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/osx/libsteam_api.dylib
     #clang -o testapp -Wall -O0 -ggdb3 testapp.c steamshim_child.c
 else # mingw example here
     x86_64-w64-mingw32-g++ -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib -c -o steamshim.o
