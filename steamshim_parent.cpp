@@ -34,6 +34,26 @@ typedef int PipeType;
 static inline void dbgpipe(const char *fmt, ...) {}
 #endif
 
+//rekkie -- s
+#if _MSC_VER >= 1920 && !__INTEL_COMPILER
+// Force printing printf to MSVC debug output window.
+#define printf printf2
+int __cdecl printf2(const char* format, ...)
+{
+    char str[1024];
+
+    va_list argptr;
+    va_start(argptr, format);
+    int ret = vsnprintf(str, sizeof(str), format, argptr);
+    va_end(argptr);
+
+    OutputDebugStringA(str);
+
+    return ret;
+}
+#endif
+//rekkie -- e
+
 /* platform-specific mainline calls this. */
 static int mainline(void);
 
@@ -63,7 +83,7 @@ static bool writePipe(PipeType fd, const void *buf, const unsigned int _len)
 } // writePipe
 
 static int readPipe(PipeType fd, void *buf, const unsigned int _len)
-{
+{	
     const DWORD len = (DWORD) _len;
     DWORD br = 0;
     return ReadFile(fd, buf, len, &br, NULL) ? (int) br : -1;
@@ -106,33 +126,26 @@ static bool setEnvVar(const char *key, const char *val)
 
 //rekkie -- s
 #if _MSC_VER >= 1920 && !__INTEL_COMPILER
-// Force printing printf to MSVC debug output window.
-#define printf printf2
-int __cdecl printf2(const char* format, ...)
-{
-    char str[1024];
-
-    va_list argptr;
-    va_start(argptr, format);
-    int ret = vsnprintf(str, sizeof(str), format, argptr);
-    va_end(argptr);
-
-    OutputDebugStringA(str);
-
-    return ret;
-}
-#endif
-
 void q2Args(wchar_t *buf)
 {
     // Get the user Steam ID
-    wchar_t steamid_str[256];
-    uint64_t steamid = SteamUser()->GetSteamID().ConvertToUint64();
+    wchar_t tmp[256];
+    static uint64_t steamid = SteamUser()->GetSteamID().ConvertToUint64();
+    static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
+    static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
     wcscpy(buf, TEXT(" +set steamid "));
     //swprintf(steamid_str, L"%" PRIx64, steamid); // Non-Microsoft version, to compile with MSVC include preprocessor _CRT_NON_CONFORMING_SWPRINTFS
-    _swprintf(steamid_str, L"%" PRIi64, steamid); // Microsoft version
-    wcscat(buf, steamid_str);
+    _swprintf(tmp, L"%" PRIi64, steamid); // Microsoft version
+    wcscat(buf, tmp);
 
+    // Append steamCloudApp, steamCloudUser to the buffer
+	wcscat(buf, TEXT(" +set steamcloudappenabled "));
+	_swprintf(tmp, L"%d", steamCloudApp);
+	wcscat(buf, tmp);
+	wcscat(buf, TEXT(" +set steamclouduserenabled "));
+	_swprintf(tmp, L"%d", steamCloudUser);
+	wcscat(buf, tmp);
+	
     // Add user command line arguments, if any
     int nArgs;
     LPWSTR* szArglist;
@@ -149,9 +162,12 @@ void q2Args(wchar_t *buf)
     // Free memory allocated for CommandLineToArgvW arguments.
     LocalFree(szArglist);
 }
+#endif
 
 static bool launchChild(ProcessType* pid)
 {
+#if _MSC_VER >= 1920 && !__INTEL_COMPILER
+	
     wchar_t prog[256];  // Program exe
     wchar_t args[256];  // User args
 
@@ -167,11 +183,25 @@ static bool launchChild(ProcessType* pid)
     si.cb = sizeof(si);
     if (CreateProcessW(&prog[0], &args[0], NULL, NULL, TRUE, 0, NULL, NULL, &si, pid))
     {
-        WaitForSingleObject(pid->hProcess, INFINITE);
+        //WaitForSingleObject(pid->hProcess, INFINITE);
         return true;
     }
     else
         return false;
+	
+#else // Linux / Mac
+	
+    static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
+    static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
+    char buf[256];
+    snprintf(buf, sizeof(buf), " +set steamid %"PRIu64, SteamID);
+    snprintf(buf, sizeof(buf), " +set isCloudEnabledForSteamApp %d +set isCloudEnabledForSteamAccount %d", steamCloudApp, steamCloudUser); // Append to buffer
+
+    return (CreateProcessW(TEXT(".\\") TEXT(GAME_LAUNCH_NAME) TEXT(".exe") TEXT(buf),
+        GetCommandLineW(), NULL, NULL, TRUE, 0, NULL,
+        NULL, NULL, pid) != 0);
+#endif
 } // launchChild
 //rekkie -- e
 
@@ -260,16 +290,28 @@ static bool launchChild(ProcessType *pid)
         return true;  // we'll let the pipe fail if this didn't work.
 
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
+    static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
+    static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
     char buf[256];
-    snprintf(buf, sizeof buf, "%"PRIu64, SteamID);
+    char buf2[256];
+    char buf3[256];
+    snprintf(buf, sizeof buf, "%llu", SteamID);
+    snprintf(buf2, sizeof buf2, "%d", steamCloudApp);
+    snprintf(buf3, sizeof buf3, "%d", steamCloudUser);
 
     // we're the child.
     GArgv[0] = strdup("q2pro");
     GArgv[1] = strdup("+set");
     GArgv[2] = strdup("steamid");
     GArgv[3] = strdup(buf);
+    GArgv[4] = strdup("+set");
+    GArgv[5] = strdup("steamcloudappenabled");
+    GArgv[6] = strdup(buf2);
+    GArgv[7] = strdup("+set");
+    GArgv[8] = strdup("steamclouduserenabled");
+    GArgv[9] = strdup(buf3);
     // This is the magic here, passing the steamid argument to q2pro
-    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], NULL);
+    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], GArgv[4], GArgv[5], GArgv[6], GArgv[7], GArgv[8], GArgv[9], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
 } // launchChild
@@ -743,4 +785,3 @@ static int mainline(void)
 } // mainline
 
 // end of steamshim_parent.cpp ...
-
