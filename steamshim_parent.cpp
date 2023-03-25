@@ -746,6 +746,12 @@ static int mainline(void)
     PipeType pipeChildWrite = NULLPIPE;
     ProcessType childPid;
 
+    static char *name = GArgv[1];
+
+    if (name == NULL){
+        name = "q2pro";
+    }
+
     dbgpipe("Parent starting mainline.\n");
 
     if (!createPipes(&pipeParentRead, &pipeParentWrite, &pipeChildRead, &pipeChildWrite))
@@ -754,7 +760,7 @@ static int mainline(void)
         fail("Failed to initialize Steamworks");
     else if (!setEnvironmentVars(pipeChildRead, pipeChildWrite))
         fail("Failed to set environment variables");
-    else if (!launchChild(&childPid, GArgv[1]))
+    else if (!launchChild(&childPid, name))
         fail("Failed to launch application");
 
     // Close the ends of the pipes that the child will use; we don't need them.
