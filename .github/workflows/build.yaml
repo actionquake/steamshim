@@ -56,11 +56,10 @@ jobs:
       - name: Unzip steamworks file
         run: |
           unzip steamworks_sdk_156.zip
-          mv sdk/public/steam steam
 
       - name: Build
         run: |
-          g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -no-pie
+          g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -I sdk/public/steam/ -no-pie
           strip aqtion
 
       - name: Set binary as executable
@@ -119,11 +118,10 @@ jobs:
       - name: Unzip steamworks file
         run: |
           unzip steamworks_sdk_156.zip
-          mv sdk/public/steam steam
 
       - name: Build
         run: |
-          clang++ -o aqtion -Wall -O0 -ggdb3 -Dnullptr=0 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/osx/libsteam_api.dylib
+          clang++ -o aqtion -Wall -O0 -ggdb3 -Dnullptr=0 steamshim_parent.cpp -I sdk/public/steam sdk/redistributable_bin/osx/libsteam_api.dylib
         env:
           CFLAGS: "-mmacosx-version-min=10.7"
 
