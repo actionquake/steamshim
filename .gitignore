@@ -3,3 +3,4 @@ steamshim
 testapp.dSYM
 steamshim.dSYM
 .vscode
+steam/*
