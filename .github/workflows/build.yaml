@@ -40,7 +40,7 @@ jobs:
           mv sdk/public/steam steam
 
       - name: Build
-        run: msbuild steamshim.vcxproj /p:IncludePath="sdk/public/steam;$(IncludePath)" /p:configuration=release
+        run: msbuild steamshim.vcxproj /p:IncludePath="sdk/public/steam" /p:configuration=release
 
       - name: Generate archive
         uses: actions/upload-artifact@v3
