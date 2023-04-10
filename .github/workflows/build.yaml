@@ -35,7 +35,9 @@ jobs:
         uses: microsoft/setup-msbuild@v1.1
 
       - name: Unzip steamworks file
-        run: unzip steamworks_sdk_156.zip
+        run: |
+          unzip steamworks_sdk_156.zip
+          mv sdk/public/steam steam
 
       - name: Build
         run: msbuild steamshim.vcxproj /p:configuration=release
@@ -52,7 +54,9 @@ jobs:
       - uses: actions/checkout@v3
 
       - name: Unzip steamworks file
-        run: unzip steamworks_sdk_156.zip
+        run: |
+          unzip steamworks_sdk_156.zip
+          mv sdk/public/steam steam
 
       - name: Build
         run: |
@@ -113,7 +117,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Unzip steamworks file
-        run: unzip steamworks_sdk_156.zip
+        run: |
+          unzip steamworks_sdk_156.zip
+          mv sdk/public/steam steam
 
       - name: Build
         run: |
