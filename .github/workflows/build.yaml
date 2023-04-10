@@ -52,14 +52,13 @@ jobs:
 
       - name: Set binary as executable
         run: |
-          chmod +x builddir/aqtion*
+          chmod +x aqtion
           
       - name: Generate Linux x64 archives
         uses: actions/upload-artifact@v3
         with:
           name: aqtion-lin-gcc
-          path: |
-            aqtion
+          path: aqtion
 
   # Do ARM build at some point
   # linuxARM64:
