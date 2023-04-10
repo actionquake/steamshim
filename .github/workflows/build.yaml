@@ -40,7 +40,7 @@ jobs:
           mv sdk/public/steam steam
 
       - name: Build
-        run: msbuild steamshim.vcxproj /p:configuration=release
+        run: msbuild steamshim.vcxproj /p:IncludePath="sdk/public/steam;$(IncludePath)" /p:configuration=release
 
       - name: Generate archive
         uses: actions/upload-artifact@v3
@@ -59,7 +59,7 @@ jobs:
 
       - name: Build
         run: |
-          g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -I sdk/public/steam/ -no-pie
+          g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp sdk/redistributable_bin/linux64/libsteam_api.so -I sdk/public/steam/ -no-pie
           strip aqtion
 
       - name: Set binary as executable
