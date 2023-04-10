@@ -65,7 +65,7 @@ static bool createPipes(PipeType *pPipeParentRead, PipeType *pPipeParentWrite,
                         PipeType *pPipeChildRead, PipeType *pPipeChildWrite);
 static void closePipe(PipeType fd);
 static bool setEnvVar(const char *key, const char *val);
-static bool launchChild(ProcessType *pid);
+static bool launchChild(ProcessType *pid, const char *name);
 static int closeProcess(ProcessType *pid);
 
 #ifdef _WIN32
@@ -281,7 +281,7 @@ static bool setEnvVar(const char *key, const char *val)
 static int GArgc = 0;
 static char **GArgv = NULL;
 
-static bool launchChild(ProcessType *pid)
+static bool launchChild(ProcessType *pid, const char *name)
 {
     *pid = fork();
     if (*pid == -1)   // failed
@@ -292,26 +292,29 @@ static bool launchChild(ProcessType *pid)
     static uint64 SteamID = SteamUser()->GetSteamID().ConvertToUint64();
     static bool steamCloudApp = SteamRemoteStorage()->IsCloudEnabledForApp();
     static bool steamCloudUser = SteamRemoteStorage()->IsCloudEnabledForAccount();
-    char buf[256];
-    char buf2[256];
-    char buf3[256];
-    snprintf(buf, sizeof buf, "%llu", SteamID);
-    snprintf(buf2, sizeof buf2, "%d", steamCloudApp);
-    snprintf(buf3, sizeof buf3, "%d", steamCloudUser);
+    char mainarg[256];
+    char sid[256];
+    char sca[256];
+    char scu[256];
+    snprintf(mainarg, sizeof mainarg, "./%s", name);
+    snprintf(sid, sizeof sid, "%llu", SteamID);
+    snprintf(sca, sizeof sca, "%d", steamCloudApp);
+    snprintf(scu, sizeof scu, "%d", steamCloudUser);
 
+    printf("Launching %s ...", name);
     // we're the child.
-    GArgv[0] = strdup("q2pro");
+    GArgv[0] = strdup(mainarg);
     GArgv[1] = strdup("+set");
     GArgv[2] = strdup("steamid");
-    GArgv[3] = strdup(buf);
+    GArgv[3] = strdup(sid);
     GArgv[4] = strdup("+set");
     GArgv[5] = strdup("steamcloudappenabled");
-    GArgv[6] = strdup(buf2);
+    GArgv[6] = strdup(sca);
     GArgv[7] = strdup("+set");
     GArgv[8] = strdup("steamclouduserenabled");
-    GArgv[9] = strdup(buf3);
-    // This is the magic here, passing the steamid argument to q2pro
-    execlp("./q2pro", GArgv[0], GArgv[1], GArgv[2], GArgv[3], GArgv[4], GArgv[5], GArgv[6], GArgv[7], GArgv[8], GArgv[9], NULL);
+    GArgv[9] = strdup(scu);
+    // This is the magic here, passing the steamid argument to q2pro executable
+    execlp(mainarg, GArgv[0], GArgv[1], GArgv[2], GArgv[3], GArgv[4], GArgv[5], GArgv[6], GArgv[7], GArgv[8], GArgv[9], NULL);
     // still here? It failed! Terminate, closing child's ends of the pipes.
     _exit(1);
 } // launchChild
@@ -743,6 +746,12 @@ static int mainline(void)
     PipeType pipeChildWrite = NULLPIPE;
     ProcessType childPid;
 
+    static char *name = GArgv[1];
+
+    if (name == NULL){
+        name = "q2pro";
+    }
+
     dbgpipe("Parent starting mainline.\n");
 
     if (!createPipes(&pipeParentRead, &pipeParentWrite, &pipeChildRead, &pipeChildWrite))
@@ -751,7 +760,7 @@ static int mainline(void)
         fail("Failed to initialize Steamworks");
     else if (!setEnvironmentVars(pipeChildRead, pipeChildWrite))
         fail("Failed to set environment variables");
-    else if (!launchChild(&childPid))
+    else if (!launchChild(&childPid, name))
         fail("Failed to launch application");
 
     // Close the ends of the pipes that the child will use; we don't need them.
