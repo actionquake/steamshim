@@ -52,7 +52,7 @@ jobs:
 
       - name: Set binary as executable
         run: |
-          chmod +x builddir/aqtion*
+          chmod +x aqtion
           
       - name: Generate Linux x64 archives
         uses: actions/upload-artifact@v3
