@@ -4,27 +4,44 @@ on:
   workflow_dispatch:
 
 jobs:
-  mingw:
-    runs-on: ubuntu-latest
+  # mingw:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+
+  #     - name: Set up MinGW
+  #       uses: egor-tensin/setup-mingw@v2
+  #       with:
+  #         platform: x64
+
+  #     - name: Build
+  #       run: |
+  #         x86_64-w64-mingw32-g++ -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib -c -o aqtion.o
+  #         x86_64-w64-mingw32-g++ -static -static-libgcc -static-libstdc++ -o aqtion.exe aqtion.o -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib
+
+  #     - name: Generate Win Mingw archives
+  #       uses: actions/upload-artifact@v3
+  #       with:
+  #         name: aqtion-win64-x86_64
+  #         path: |
+  #           aqtion
+
+  windows:
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up MinGW
-        uses: egor-tensin/setup-mingw@v2
-        with:
-          platform: x64
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
 
       - name: Build
-        run: |
-          x86_64-w64-mingw32-g++ -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib -c -o aqtion.o
-          x86_64-w64-mingw32-g++ -static -static-libgcc -static-libstdc++ -o aqtion.exe aqtion.o -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib
+        run: msbuild steamshim.vcxproj /p:configuration=release
 
-      - name: Generate Win Mingw archives
+      - name: Generate archive
         uses: actions/upload-artifact@v3
         with:
-          name: aqtion-win64-x86_64
-          path: |
-            aqtion
+          name: "aqtion-win-x86_64"
+          path: aqtion.exe
 
   linux64:
     runs-on: ubuntu-20.04
@@ -35,8 +52,6 @@ jobs:
         run: |
           g++ -Wl,-rpath='$ORIGIN' -o aqtion -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/linux64/libsteam_api.so -no-pie
           strip aqtion
-        env:
-          CC: gcc
 
       - name: Set binary as executable
         run: |
@@ -105,8 +120,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: aqtion-darwin-x86_64
-          path: |
-            aqtion
+          path: aqtion
 
   # Github does not support Apple Silicon yet
   # macARM64:
