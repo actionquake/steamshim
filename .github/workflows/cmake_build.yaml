@@ -60,6 +60,8 @@ jobs:
 
       - name: Rename and binaries as executable
         run: |
+          ls -l
+          ls -l steamshim/
           mv steamshim/steamshim aqtion
           chmod +x aqtion
           
