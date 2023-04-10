@@ -34,6 +34,9 @@ jobs:
       - name: Add msbuild to PATH
         uses: microsoft/setup-msbuild@v1.1
 
+      - name: Unzip steamworks file
+        run: unzip steamworks_sdk_156.zip
+
       - name: Build
         run: msbuild steamshim.vcxproj /p:configuration=release
 
@@ -47,6 +50,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
+
+      - name: Unzip steamworks file
+        run: unzip steamworks_sdk_156.zip
 
       - name: Build
         run: |
@@ -105,6 +111,9 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Unzip steamworks file
+        run: unzip steamworks_sdk_156.zip
 
       - name: Build
         run: |
