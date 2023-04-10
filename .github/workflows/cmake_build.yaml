@@ -22,7 +22,7 @@ jobs:
 
       - name: Rename and binaries as executable
         run: |
-          mv steamshim.exe aqtion.exe
+          mv steamshim/steamshim.exe aqtion.exe
 
       - name: Generate Win Mingw archives
         uses: actions/upload-artifact@v3
@@ -60,7 +60,7 @@ jobs:
 
       - name: Rename and binaries as executable
         run: |
-          mv steamshim aqtion
+          mv steamshim/steamshim aqtion
           chmod +x aqtion
           
       - name: Generate Linux x64 archives
@@ -122,7 +122,7 @@ jobs:
 
       - name: Rename and binaries as executable
         run: |
-          mv steamshim aqtion
+          mv steamshim/steamshim aqtion
           chmod +x aqtion
 
       - name: Generate Mac archives
