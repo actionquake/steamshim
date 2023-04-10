@@ -1,4 +1,4 @@
-#define GAME_LAUNCH_NAME "testapp"
+#define GAME_LAUNCH_NAME "q2pro"
 #ifndef GAME_LAUNCH_NAME
 #error Please define your game exe name.
 #endif

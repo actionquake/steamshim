@@ -1,0 +1,26 @@
+name: Windows Steamshim Build
+
+# on:
+#   push:
+#     branches: ["aqtion", "master"]
+on:
+  workflow_dispatch:
+
+jobs:
+  windows_build_q2pro:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Add msbuild to PATH
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Build
+        run: msbuild steamshim.vcxproj /p:configuration=release
+
+      - name: Generate archive
+        uses: actions/upload-artifact@v3
+        with:
+          name: "steamshim-win64"
+          path: |
+            steamshim.exe
