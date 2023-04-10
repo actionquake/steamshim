@@ -9,6 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Set up MinGW
+        uses: egor-tensin/setup-mingw@v2
+        with:
+          platform: x64
+
       - name: Build
         run: |
           x86_64-w64-mingw32-g++ -Wall -O0 -ggdb3 steamshim_parent.cpp -I sdk/public sdk/redistributable_bin/win64/steam_api64.lib -c -o aqtion.o
@@ -40,7 +45,7 @@ jobs:
       - name: Generate Linux x64 archives
         uses: actions/upload-artifact@v3
         with:
-          name: aqtion-lin-gcc
+          name: aqtion-lin-x86_64
           path: aqtion
 
   # Do ARM build at some point
