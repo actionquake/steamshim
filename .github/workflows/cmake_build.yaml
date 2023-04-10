@@ -20,11 +20,15 @@ jobs:
       - name: Build
         run: cmake .
 
+      - name: Rename and binaries as executable
+        run: |
+          mv steamshim.exe aqtion.exe
+
       - name: Generate Win Mingw archives
         uses: actions/upload-artifact@v3
         with:
           name: aqtion-win64-x86_64
-          path: aqtion
+          path: aqtion.exe
 
   # windows:
   #   runs-on: windows-latest
@@ -54,8 +58,9 @@ jobs:
       - name: Build
         run: cmake .
 
-      - name: Set binary as executable
+      - name: Rename and binaries as executable
         run: |
+          mv steamshim aqtion
           chmod +x aqtion
           
       - name: Generate Linux x64 archives
@@ -112,11 +117,13 @@ jobs:
 
       - name: Build
         run: cmake .
-        # env:
-        #   CFLAGS: "-mmacosx-version-min=10.7"
+        env:
+          steamworks: "sdk"
 
-      - name: Set binaries as executable
-        run: chmod +x aqtion
+      - name: Rename and binaries as executable
+        run: |
+          mv steamshim aqtion
+          chmod +x aqtion
 
       - name: Generate Mac archives
         uses: actions/upload-artifact@v3
